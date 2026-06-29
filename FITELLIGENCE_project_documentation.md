@@ -7,7 +7,8 @@ FitIntelligence is a smart gym split calendar, membership tracker, and automated
 ##  System Architecture
 
 The project is structured as a decoupled client-server application optimized for reliability, real-time background scheduling, and automated containerized deployment.
-[fitellinengencearchitect.png](https://github.com/Binod231/FITELLIGENCE-apk/blob/main/fitellinengencearchitect.png)
+<img width="1536" height="1024" alt="fitellinengencearchitect" src="https://github.com/user-attachments/assets/941bd609-d195-406d-a837-d1535564b5b3" />
+
 
 ### Key Technical Choices
 * **Frontend**: Bare React Native with TypeScript, using Expo libraries (e.g. for push notifications, location) to access native APIs while preserving full control over the Android/iOS directories. Zustand is used for clean, lightweight state management.
