@@ -1,13 +1,14 @@
 # FitIntelligence — Technical Documentation
 
-FitIntelligence is a smart gym split calendar, membership tracker, and automated reminder application featuring GPS geofencing and Gemini AI-powered selfie verification.
+FitIntelligence is a smart gym split calendar, membership tracker, and automated reminder application featuring GPS geofencing and AWS Rekognition-powered selfie verification.
 
 ---
 
 ##  System Architecture
 
 The project is structured as a decoupled client-server application optimized for reliability, real-time background scheduling, and automated containerized deployment.
-<img width="1536" height="1024" alt="fitellinengencearchitect" src="https://github.com/user-attachments/assets/941bd609-d195-406d-a837-d1535564b5b3" />
+
+<img width="1536" height="1024" alt="fitellinengencearchitect" src="https://github.com/user-attachments/assets/010ccc8d-7186-491e-820e-0c9e2ab9600e" />
 
 
 ### Key Technical Choices
@@ -15,7 +16,7 @@ The project is structured as a decoupled client-server application optimized for
 * **Backend**: FastAPI (Python 3.11+) for high-performance, asynchronous REST API endpoints, utilizing Pydantic models for request/response validation.
 * **Database & ORM**: PostgreSQL database mapped via SQLAlchemy asynchronous ORM. Database migrations are managed via Alembic.
 * **Task Scheduling**: Redis acts as a message broker for Celery. Celery Beat executes periodic tasks (like gym membership reminders and alarm checks) while Celery Workers handle async message dispatching.
-* **AI Analysis**: Gemini 1.5 Flash is integrated directly for rapid, multimodal analysis of gym selfie uploads to verify workouts.
+* **AI Analysis**: AWS Rekognition is integrated directly for label detection on gym selfie uploads to verify a gym environment.
 
 ---
 
@@ -117,7 +118,7 @@ erDiagram
 * **Standard Mode**: Reminders send standard dismissable push notifications.
 * **Strict Mode**: Activates a full-screen lock overlay blocking application usage. To unlock the app, users must verify their gym presence using one of two methods:
   * **GPS verification**: Calculates the user's distance using the Haversine formula. The user must be within 300 meters of the registered gym's coordinates.
-  * **Gemini AI Selfie Verification**: The user takes a gym workout selfie. The app uploads it to the backend where Gemini 1.5 Flash analyzes the image. Gemini responds with a JSON object (`{"is_gym": true/false, "explanation": "..."}`) to approve or reject the verification.
+  * **AWS Rekognition Selfie Verification**: The user takes a gym workout selfie. The app uploads it to the backend where AWS Rekognition analyzes the image labels (e.g., Gym, Dumbbell, Barbell, Fitness). If these labels match the gym label dictionary with a high confidence score, the verification succeeds.
 
 ### 4. Admin Console & Analytics
 * Restricted strictly to administrative users (`is_admin=True`).
@@ -130,7 +131,7 @@ erDiagram
 
 ---
 
-##  Production Deployment (AWS EC2 & ECR)
+## ☁️ Production Deployment (AWS EC2 & ECR)
 
 The application is deployed on an **AWS EC2** instance via an automated **GitHub Actions** CI/CD pipeline.
 
@@ -139,7 +140,7 @@ sequenceDiagram
     Participant Dev as Developer
     Participant Git as GitHub Actions
     Participant ECR as AWS ECR
-    participant EC2 as AWS EC2
+    Participant EC2 as AWS EC2
 
     Dev->>Git: git push origin main
     activate Git
@@ -165,18 +166,7 @@ sequenceDiagram
 
 ### Deployment Configuration Details
 * **Multi-Container Composition**: Configured via `docker-compose.yml` specifying isolated networks, volume persistence for Postgres and Redis, and startup dependencies (healthcheck blocks).
-* **Rollback Policy**: If the HTTP healthcheck fails 10 times consecutively, the workflow connects back to EC2, stashes changes, checkouts the previous git commit, and rebuilds/restarts containers to ensure zero downtime.
-* **Environment Configuration**: Sensitive secrets (JWT secret, DB password, Gemini Key) are injected via GitHub Repository Secrets and compiled dynamically.
+* **Rollback Policy**: If the HTTP healthcheck fails 10 times consecutively, the workflow connects back to EC2, stashes changes, checks out the previous git commit, and rebuilds/restarts containers to ensure zero downtime.
+* **Environment Configuration**: Sensitive secrets (JWT secret, DB password, AWS Credentials) are injected via GitHub Repository Secrets and compiled dynamically.
 
 ---
-
-##  Local Setup and Administration
-
-### Bootstrapping Administrative Accounts
-To grant admin privileges to an account, use the utility script provided in `backend/promote_admin.py`.
-
-```bash
-cd backend
-python promote_admin.py --email user@example.com
-```
-*Note: If the email does not exist in the database, the script will automatically register them and output a default password (`Admin123!`).*
