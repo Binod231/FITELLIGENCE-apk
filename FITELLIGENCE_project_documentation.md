@@ -4,53 +4,10 @@ FitIntelligence is a smart gym split calendar, membership tracker, and automated
 
 ---
 
-## 🏛️ System Architecture
+##  System Architecture
 
 The project is structured as a decoupled client-server application optimized for reliability, real-time background scheduling, and automated containerized deployment.
-
-```mermaid
-graph TD
-    subgraph Client ["Mobile Client (React Native)"]
-        RN["React Native App"]
-        Store["Zustand State Store"]
-        PushService["Expo Push Client"]
-        Alerts["Glassmorphic UI & Overlays"]
-    end
-
-    subgraph AWS ["Production Server (AWS EC2)"]
-        subgraph Web ["Web & API Layer"]
-            FastAPI["FastAPI App (Uvicorn)"]
-        end
-
-        subgraph Worker ["Background Processing Layer"]
-            Redis["Redis Broker & Cache"]
-            Worker["Celery Worker"]
-            Beat["Celery Beat Scheduler"]
-        end
-
-        subgraph Storage ["Storage Layer"]
-            PostgreSQL[("PostgreSQL DB")]
-            Uploads["Static Directory (Uploads)"]
-        end
-    end
-
-    subgraph External ["External Services"]
-        Gemini["Gemini AI API (1.5 Flash)"]
-        Expo["Expo Push Server"]
-        OAuth["Google/Apple OAuth"]
-    end
-
-    RN -->|HTTP / JSON| FastAPI
-    FastAPI -->|ORM| PostgreSQL
-    FastAPI -->|Enqueue Jobs| Redis
-    Beat -->|Interval Trigger| Redis
-    Redis -->|Process Jobs| Worker
-    Worker -->|State Lookup| PostgreSQL
-    Worker -->|Send Push| Expo
-    Expo -->|Deliver Push| RN
-    FastAPI -->|Analyze Selfie| Gemini
-    RN -->|Social Login| OAuth
-```
+fitellinengencearchitect.png
 
 ### Key Technical Choices
 * **Frontend**: Bare React Native with TypeScript, using Expo libraries (e.g. for push notifications, location) to access native APIs while preserving full control over the Android/iOS directories. Zustand is used for clean, lightweight state management.
@@ -61,7 +18,7 @@ graph TD
 
 ---
 
-## 🗄️ Database Schema & Models
+##  Database Schema & Models
 
 Below is the entity-relationship model of the Postgres database.
 
@@ -141,7 +98,7 @@ erDiagram
 
 ---
 
-## ⚙️ Core Feature Workings
+##  Core Feature Workings
 
 ### 1. Gym Subscription Tracker
 * Users input their gym's details, registration dates, package duration, and coordinates.
@@ -172,15 +129,15 @@ erDiagram
 
 ---
 
-## ☁️ Production Deployment (AWS EC2 & ECR)
+##  Production Deployment (AWS EC2 & ECR)
 
-The application is deployed on an **AWS EC2** instance via a automated **GitHub Actions** CI/CD pipeline.
+The application is deployed on an **AWS EC2** instance via an automated **GitHub Actions** CI/CD pipeline.
 
 ```mermaid
 sequenceDiagram
-    participant Dev as Developer
-    participant Git as GitHub Actions
-    participant ECR as AWS ECR
+    Participant Dev as Developer
+    Participant Git as GitHub Actions
+    Participant ECR as AWS ECR
     participant EC2 as AWS EC2
 
     Dev->>Git: git push origin main
@@ -212,7 +169,7 @@ sequenceDiagram
 
 ---
 
-## 🛠️ Local Setup and Administration
+##  Local Setup and Administration
 
 ### Bootstrapping Administrative Accounts
 To grant admin privileges to an account, use the utility script provided in `backend/promote_admin.py`.
